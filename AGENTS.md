@@ -31,6 +31,6 @@ Entry text: one `key: value` per line with `title`, `context`, two or more `opt`
 
 Switches: `-decision-human` (user decided), `-decision-agent` (agent decided alone), `-decision-external` (a meeting, email, thread or comment settled it), each with optional `[entry-file]`; `-info` prints the ledger path and size; `-no-ledger` creates the `.no-ledger` marker in the project root and disables the ledger; `-yes-ledger` removes it; none, `-h` or `--help` print help. The marker is the only exemption. NEVER work around it. NEVER create that marker unless the user asks for it.
 
-Exit codes: 0 appended; 1 rejected, nothing written, problems on standard error; 2 misuse or unreadable entry file; 3 ledger disabled, say so to the user.
+Exit codes: 0 appended; 1 rejected, nothing written, problems on standard error; 2 misuse or unreadable entry file; 3 ledger disabled, say so to the user; 4 LEDGER.md could not be written (locked by another program, read-only or full), say so to the user; when the line says written but not confirmed, the entry is there, so do not retry. Each run only appends its own entry, so many agents may write at once.
 
 (Yes, this file also applies to agents working on the explain-and-decide repository itself. Especially to them.)

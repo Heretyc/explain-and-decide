@@ -30,7 +30,7 @@ The script sits in the sibling core skill folder, not in this one. Claude Code, 
 | `-yes-ledger` | Enable it again (removes `.no-ledger`) |
 | none, `-h`, `--help` | Print help |
 
-Entry text comes from the entry file, else from standard input (quoted bash heredoc, or PowerShell single-quoted here-string piped in). Exit codes: 0 appended; 1 rejected, nothing written; 2 misuse or unreadable entry file; 3 ledger disabled. LEDGER.md sits in the project root and is private: the script lists it in `.git/info/exclude` so it never reaches a repository.
+Entry text comes from the entry file, else from standard input (quoted bash heredoc, or PowerShell single-quoted here-string piped in). Exit codes: 0 appended; 1 rejected, nothing written; 2 misuse or unreadable entry file; 3 ledger disabled; 4 LEDGER.md could not be written (locked by another program, read-only or full), nothing recorded unless the line says written but not confirmed. LEDGER.md sits in the project root and is private: the script lists it in `.git/info/exclude` so it never reaches a repository. Each run only appends its own entry, so many agents may write at once.
 
 ## Entry keys
 

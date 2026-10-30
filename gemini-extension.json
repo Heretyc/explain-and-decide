@@ -1,6 +1,6 @@
 {
   "name": "explain-and-decide",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Rules for AI coding agents: explain everything for a reader who knows nothing about the project, give every option a Pro and a Con, and record every decision in LEDGER.md, a private decision ledger kept out of version control.",
   "contextFileName": "AGENTS.md"
 }

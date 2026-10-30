@@ -1,6 +1,6 @@
 {
   "name": "explain-and-decide",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "description": "A skill, meaning a reusable instruction set for AI coding agents, that enforces explanations readable with zero prior knowledge, a Pro and a Con on every option, and a local ledger entry for every decision.",
   "license": "MIT",

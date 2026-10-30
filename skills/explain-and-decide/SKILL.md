@@ -103,7 +103,7 @@ The project root is the git top level of the current directory, else the current
 
 | Switch | Effect |
 |---|---|
-| `-decision-human`, `-decision-agent`, `-decision-external`, each with optional `[entry-file]` | Append one decision from that source (Mandate 3) |
+| `-decision-human`, `-decision-agent`, `-decision-external`, each with optional `[entry-file]` | Append one decision from that source (Mandate 3); exit 4 when LEDGER.md cannot be written |
 | `-info` | Print the ledger path and size, plus a line when logging is disabled |
 | `-no-ledger` | Disable the ledger for this project (creates `.no-ledger`) |
 | `-yes-ledger` | Enable the ledger again (removes `.no-ledger`) |
@@ -203,7 +203,16 @@ node --experimental-strip-types "${CLAUDE_SKILL_DIR}/scripts/ledger.ts" -decisio
 - Rejection (exit 1) prints every problem to standard error, then an `example:` line and one valid example; nothing is written. Fix every listed line and retry.
 - Misuse prints help and exits 2; an entry-file that cannot be read prints `cannot read` and exits 2.
 - Disabled ledger prints a one-line notice and exits 3. Tell the user the decision was not recorded and why.
-- A line starting with `warning:` means the entry was appended but LEDGER.md could not be added to `.git/info/exclude`; add that line yourself or tell the user, so it is never committed.
+- Not written (exit 4) prints one line starting with `decision NOT recorded` and the error code: LEDGER.md is locked by another program, read-only, full, or on storage that cannot append. A locked file is retried for about 2 seconds first; other causes stop at once. Tell the user the decision was not recorded and why; retry once the cause is fixed. If the line also says a cut-off entry may remain, tell the user so. Never edit LEDGER.md by hand to work around it.
+- Exit 4 with a line starting with `decision written but not confirmed on disk` means the entry is in LEDGER.md but the disk did not confirm it. Do not retry, since that would record the decision twice; tell the user to check that LEDGER.md ends with the entry.
+- Exit 4 with a line starting with `NOT done` means `-no-ledger` or `-yes-ledger` could not change `.no-ledger`; tell the user why.
+- A line starting with `warning: could not add LEDGER.md` means the entry was appended but LEDGER.md could not be added to `.git/info/exclude`; add the lines `LEDGER.md` and `LEDGER.md.*.tmp` yourself or tell the user, so it is never committed.
+- A line starting with `warning: LEDGER.md was empty` means LEDGER.md existed with no content, so the entry was appended without the file's header. Tell the user: earlier entries may have been lost.
+
+### Safe writing
+
+Many agents may run the script at the same moment. Each run only appends its own entry and never rewrites earlier ones; the first run creates LEDGER.md with its header in one step.
+Known limits: runs on different machines that share one LEDGER.md over a network drive (NFS or SMB, the common file sharing protocols) or a synced folder (OneDrive, Dropbox, Google Drive) can still mix or lose entries, or produce conflict copies, because those do not make appends safe across machines. Cloud bucket mounts (s3fs, gcsfuse, mountpoint-s3, which show object storage as a folder) may refuse appends (exit 4) or only imitate them. On macOS the drive's own write cache is not forced to disk. A crash mid-write can cut off only the newest entry, never older ones.
 
 ## Before you send or act, check
 

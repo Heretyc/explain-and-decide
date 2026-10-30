@@ -11,7 +11,7 @@ const path = require('node:path');
 const { root, readJson, runNode } = require('./helpers');
 
 const NAME = 'explain-and-decide';
-const VERSION = '1.0.0';
+const VERSION = '1.1.0';
 const VERSIONED = [
   '.claude-plugin/plugin.json',
   '.codex-plugin/plugin.json',

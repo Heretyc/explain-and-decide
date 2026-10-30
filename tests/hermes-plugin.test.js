@@ -32,7 +32,7 @@ function pythonExe() {
 test('plugin.yaml names the plugin, pins the version, lists skills and commands, has no hooks', () => {
   const yaml = readText('plugin.yaml').replace(/\r\n/g, '\n');
   assert.match(yaml, /^name:\s*explain-and-decide\s*$/m);
-  assert.match(yaml, /^version:\s*"?1\.0\.0"?\s*$/m);
+  assert.match(yaml, /^version:\s*"?1\.1\.0"?\s*$/m);
   for (const key of ['provides_commands', 'provides_skills']) {
     const items = yamlList(yaml, key);
     assert.ok(items, `${key} list missing`);

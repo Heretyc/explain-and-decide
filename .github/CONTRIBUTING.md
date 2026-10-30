@@ -44,3 +44,5 @@ npm run build     # regenerate .openclaw/skills/ and write dist/explain-and-deci
 ```
 
 Tests must pass on Node.js 22.6 and on 24. When a test spawns the `.ts` ledger script it adds `--experimental-strip-types` unless `process.features.typescript` reports native support.
+
+`EAD_NO_HARDLINK=1` is a test-only environment variable: the ledger script then skips the hard link (a second name for one file, which lets the script create `LEDGER.md` with its header in one step) and creates a missing `LEDGER.md` by exclusive create, the path taken on storage without hard links, so `tests/concurrency.test.js` exercises that create path on every platform. The wait for a header that another run is still writing has its own test, which writes the header in two parts. `tests/fault.cjs` is a preload (loaded with `node --require`) that injects a short write on a full disk or a failed fsync into the ledger script, so both exit 4 messages are tested on every platform.

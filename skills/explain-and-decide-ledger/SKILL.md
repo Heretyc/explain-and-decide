@@ -32,7 +32,7 @@ When the user asks to record a decision:
 1. Pick the mode by source: `-decision-human` when the user decided, `-decision-agent` when the agent decided alone, `-decision-external` when a meeting, email, thread or comment settled it.
 2. Build an entry in the grammar: one `key: value` per line with `title`, `context`, two or more `opt` each followed by `pro` and `con`, `pick`, `why`, `plus`, `minus`, and the source keys for the mode (`by` for human and agent; `deciders` plus `url`, or `meeting` + `on`, or `subject` + `on` + `from`, or `other` for external). An optional `status` line sets Deprecated or Rejected.
 3. Deliver it by entry file (`-decision-human path/to/entry.txt`) or by standard input (a quoted bash heredoc, or a PowerShell single-quoted here-string piped to node). Use the file form whenever the text holds non-English letters on Windows.
-4. Report the script's output verbatim: the `appended:` line on exit 0; the listed problems on exit 1, then fix every one and retry; exit 3 means the ledger is disabled and nothing was recorded.
+4. Report the script's output verbatim: the `appended:` line on exit 0; the listed problems on exit 1, then fix every one and retry; exit 3 means the ledger is disabled and nothing was recorded; exit 4 means LEDGER.md could not be written (locked by another program, read-only or full) and nothing was recorded, unless the line starts with `decision written but not confirmed on disk`: then the entry is there, so do not retry.
 
 A reversal or a change of mind is a new entry whose Context names the entry it reverses. Never edit the earlier entry.
 

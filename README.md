@@ -64,7 +64,7 @@ Each entry records the status, date, deciders and source, the context, the optio
 
 A complete sample with three entries is in [examples/LEDGER.md](examples/LEDGER.md).
 
-The ledger is private. The script adds `LEDGER.md` to the repository's local exclude list, the file `.git/info/exclude`, which git reads like `.gitignore` but never commits. The ledger therefore never reaches a repository or a pull request. If the script cannot write that list it prints a line starting with `warning:` so the exclusion can be added by hand.
+The ledger is private. The script adds `LEDGER.md` to the repository's local exclude list, the file `.git/info/exclude`, which git reads like `.gitignore` but never commits. The ledger therefore never reaches a repository or a pull request. It also lists `LEDGER.md.*.tmp`, the temporary files used to create the ledger, so a run stopped midway leaves nothing to commit. If the script cannot write that list it prints a line starting with `warning: could not add LEDGER.md` so the exclusion can be added by hand.
 
 To turn the ledger off for one project, run the script with `-no-ledger`. That creates a marker file named `.no-ledger` in the project root; while it exists the script refuses to record anything and exits with code 3. `-yes-ledger` removes the marker.
 
@@ -104,7 +104,9 @@ The script is `scripts/ledger.ts` inside the core skill folder. On Claude Code t
 | `-yes-ledger` | Enable the ledger again (removes `.no-ledger`) |
 | none, `-h`, `--help` | Print help |
 
-Exit codes: 0, appended (one line starting with `appended:` names the title and the ledger path); 1, rejected (every problem is listed on standard error with a valid example, nothing is written); 2, misuse (help is printed) or an entry file that cannot be read; 3, ledger disabled by `.no-ledger`.
+Exit codes: 0, appended (one line starting with `appended:` names the title and the ledger path); 1, rejected (every problem is listed on standard error with a valid example, nothing is written); 2, misuse (help is printed) or an entry file that cannot be read; 3, ledger disabled by `.no-ledger`; 4, not written (one line starting with `decision NOT recorded` names the error code: `LEDGER.md` is locked by another program, read-only, full, or on storage that cannot append; a locked file is retried for about 2 seconds first, other causes stop at once; the line adds a note when a cut-off entry may remain at the end). Two other exit 4 lines: `decision written but not confirmed on disk` means the entry is in `LEDGER.md` but the disk did not confirm it, so a retry would record it twice; `NOT done` means `-no-ledger` or `-yes-ledger` could not change `.no-ledger`.
+
+Many agents may run the script at the same moment, on macOS, Windows, Linux, cloud machines and containers. Each run only appends its own entry and never rewrites earlier ones, the first run creates `LEDGER.md` with its header in one step, and the entry is flushed to disk before `appended:` is printed. If `LEDGER.md` exists but is empty, the entry is appended without the header and a line starting with `warning: LEDGER.md was empty` reports it, since earlier entries may have been lost. Known limits: runs on different machines that share one `LEDGER.md` over a network drive (NFS or SMB, the common file sharing protocols) or a synced folder (OneDrive, Dropbox, Google Drive) can still mix or lose entries, or produce conflict copies, because those do not make appends safe across machines; cloud bucket mounts (s3fs, gcsfuse, mountpoint-s3, which show object storage as a folder) may refuse appends (exit 4) or only imitate them; two first runs at once may both add the exclude lines to `.git/info/exclude`, which git accepts; on macOS the drive's own write cache is not forced to disk; a crash mid-write can cut off only the newest entry, never older ones.
 
 The entry text comes from the entry file when one is given, else from standard input. User decision, bash heredoc:
 

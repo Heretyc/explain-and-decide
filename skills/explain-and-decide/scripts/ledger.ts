@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readFileSync, statSync, unlinkSync, writeFileSync, writeSync } from "node:fs";
+import { appendFileSync, closeSync, constants, existsSync, fstatSync, fsyncSync, linkSync, lstatSync, mkdirSync, openSync, readFileSync, readSync, statSync, unlinkSync, writeFileSync, writeSync } from "node:fs";
 import { basename, dirname, join, resolve } from "node:path";
 import { execFileSync } from "node:child_process";
 
@@ -30,7 +30,7 @@ const EXAMPLE = [
 const EXAMPLE_SOURCE: Record<Mode, string[]> = { human: ["by: Alex"], agent: ["by: Claude Code"], external: ["deciders: Alex", "url: https://example.com/thread/1"] };
 
 const HELP = [
-  "usage: node ledger.ts <switch> [entry-file]   (-h | --help: this text)",
+  "usage: node ledger.ts <switch> [entry-file]   (-h | --help: this text)   exit: 0 appended, 1 rejected, 2 misuse, 3 disabled, 4 not written",
   "  -decision-human [file]     append a decision made by the user",
   "  -decision-agent [file]     append a decision made by the agent on its own",
   "  -decision-external [file]  append a decision taken from a meeting, email, link or other source",
@@ -204,18 +204,84 @@ function build(mode: Mode, items: Item[], errors: string[]): { title: string; li
   return { title: val("title"), lines };
 }
 
-function appendEntry(root: string, ledger: string, entry: string): void {
-  const cur = existsSync(ledger) ? readFileSync(ledger, "utf8").replace(/\s+$/, "") : "";
-  const head = cur || `# DECISIONS LEDGER FOR ${basename(root)}\nAll notable decisions to this project will be documented in this file.\n`
-    + "Intended for local user review only: Never publish to any repository or mention in any public way. For the user's eyes only.";
-  writeFileSync(ledger, head + "\n\n" + entry + "\n");
+const BUSY = ["EBUSY", "EPERM", "EACCES", "EAGAIN"];
+// Codes for hard links or fsync the storage does not support. EISDIR is how Windows reports it on FAT and exFAT.
+const UNSUPPORTED = ["EPERM", "ENOTSUP", "EOPNOTSUPP", "EXDEV", "ENOSYS", "EINVAL", "EISDIR"];
+
+function sleep(ms: number): void { Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms); }
+
+function create(ledger: string, head: string): void {
+  const tmp = `${ledger}.${process.pid}-${Date.now()}-${Math.random().toString(36).slice(2)}.tmp`;
+  try {
+    writeFileSync(tmp, head, { flag: "wx" });
+    if (process.env.EAD_NO_HARDLINK) throw Object.assign(new Error("hard links disabled"), { code: "ENOTSUP" });
+    linkSync(tmp, ledger);
+  } catch (e: any) {
+    if (e.code !== "EEXIST" && !UNSUPPORTED.includes(e.code)) throw e;
+    if (e.code !== "EEXIST") try { writeFileSync(ledger, head, { flag: "wx" }); } catch (e2: any) { if (e2.code !== "EEXIST") throw e2; }
+  } finally { try { unlinkSync(tmp); } catch {} }
+}
+
+function openLedger(ledger: string, head: string): number {
+  const end = performance.now() + 2000;
+  for (let ms = 10; ; ms = Math.min(ms * 2, 250)) {
+    try {
+      if (!existsSync(ledger)) create(ledger, head);
+      return openSync(ledger, constants.O_RDWR | constants.O_APPEND);
+    } catch (e: any) {
+      if (e.code === "ENOENT" && lstatSync(ledger, { throwIfNoEntry: false })?.isSymbolicLink()) throw new Error("LEDGER.md is a symbolic link to a missing file");
+      if ((!BUSY.includes(e.code) && e.code !== "ENOENT") || performance.now() > end) throw e;
+      sleep(ms);
+    }
+  }
+}
+
+function tail(fd: number, size: number, min: number): string {
+  const n = size < min ? size : 2, buf = Buffer.alloc(n);
+  readSync(fd, buf, 0, n, size - n);
+  return buf.toString("latin1");
+}
+
+// Throws with done and total set, so the caller can tell nothing written, part written and written but not synced apart.
+function appendEntry(ledger: string, head: string, entry: string): void {
+  const min = Buffer.byteLength(head), fd = openLedger(ledger, head);
+  let data = Buffer.alloc(0), done = 0, fail: any, t = "", size = 0;
+  try {
+    // Wait while the file is shorter than the header (another run is still writing it). A tail other than one LF
+    // can also be another run's entry caught mid-write, so it is trusted only once the size stays the same.
+    const end = performance.now() + 2000;
+    for (;;) {
+      size = fstatSync(fd).size;
+      t = tail(fd, size, min);
+      if ((size >= min && /[^\n]\n$/.test(t)) || performance.now() > end) break;
+      sleep(size < min ? 20 : 50);
+      if (size >= min && fstatSync(fd).size === size) break;
+    }
+    data = Buffer.from((!size || t.endsWith("\n\n") ? "" : t.endsWith("\n") ? "\n" : "\n\n") + entry + "\n");
+    while (done < data.length) {
+      const n = writeSync(fd, data, done);
+      if (n < 1) throw Object.assign(new Error("no space left"), { code: "ENOSPC" });
+      done += n;
+    }
+    try { fsyncSync(fd); } catch (e: any) { if (!UNSUPPORTED.includes(e.code)) throw e; }
+  } catch (e) { fail = e; }
+  try { closeSync(fd); } catch (e) { fail ??= e; }
+  if (fail) throw Object.assign(fail, { done, total: data.length });
+  if (size < min && !t.trim()) err("warning: LEDGER.md was empty; the entry was appended without the header and earlier entries may be lost");
+}
+
+// Lists LEDGER.md and the temporary files used to create it in .git/info/exclude, before the first write,
+// so neither can be committed. Append only; two first runs at once may both add the lines, which git accepts.
+function excludeLedger(root: string): void {
   if (!existsSync(join(root, ".git"))) return;
   try {
     const p = resolve(root, git(["rev-parse", "--git-path", "info/exclude"], root));
     const text = existsSync(p) ? readFileSync(p, "utf8") : "";
-    if (text.split(/\r?\n/).some((l) => l.trim() === "LEDGER.md")) return;
+    const have = text.split(/\r?\n/).map((l) => l.trim());
+    const want = ["LEDGER.md", "LEDGER.md.*.tmp"].filter((w) => !have.includes(w));
+    if (!want.length) return;
     mkdirSync(dirname(p), { recursive: true });
-    writeFileSync(p, text + (text && !text.endsWith("\n") ? "\n" : "") + "LEDGER.md\n");
+    appendFileSync(p, (text && !text.endsWith("\n") ? "\n" : "") + want.join("\n") + "\n");
   } catch { err("warning: could not add LEDGER.md to git info/exclude"); }
 }
 
@@ -252,8 +318,21 @@ async function main(): Promise<void> {
   const { items, errors } = parse(text);
   const built = build(mode, items, errors);
   if (!built) { errors.concat(["example:"], EXAMPLE, EXAMPLE_SOURCE[mode]).forEach(err); process.exit(1); }
-  appendEntry(root, ledger, built.lines.join("\n\n"));
+  const head = `# DECISIONS LEDGER FOR ${basename(root)}\nAll notable decisions to this project will be documented in this file.\n`
+    + "Intended for local user review only: Never publish to any repository or mention in any public way. For the user's eyes only.\n";
+  excludeLedger(root);
+  try { appendEntry(ledger, head, built.lines.join("\n\n")); } catch (e: any) {
+    const code = e.code || e.message;
+    if (e.total && e.done === e.total) err(`decision written but not confirmed on disk: ${ledger} (${code}); do not retry, check that LEDGER.md ends with this entry`);
+    else err(`decision NOT recorded: cannot write ${ledger} (${code}); it is locked by another program, read-only, full or on storage that cannot append`
+      + (e.done ? "; a cut-off entry may remain at the end of LEDGER.md" : ""));
+    process.exit(4);
+  }
   out(`appended: ${built.title} -> ${ledger}`);
 }
 
-main();
+main().catch((e: any) => {
+  if (!e?.code) throw e;
+  err(`NOT done: cannot change ${e.path || "a project file"} (${e.code})`);
+  process.exit(4);
+});

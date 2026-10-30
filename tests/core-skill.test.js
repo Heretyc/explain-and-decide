@@ -13,8 +13,8 @@ const {
 const SKILL = 'skills/explain-and-decide/SKILL.md';
 const SCRIPT = 'skills/explain-and-decide/scripts/ledger.ts';
 const SHA = {
-  [SKILL]: '8f30a76c74692238ae100e98e78ebb97ec43c05047be90e6648d3887ee01384a',
-  [SCRIPT]: 'ba8b75e6501a5fe5c07ea91a192036ef87dfc54b4e94c322514c4682910c86d9',
+  [SKILL]: 'dad67a62cea46820ae99574c924fa00cd1770d4738734eeb20df24d04d03ff6a',
+  [SCRIPT]: 'd7a1436990120e59a1348ddff38a34a384d16f3443c691f60a2b506ee8db56e1',
 };
 // Spelled in two parts so this file never carries the needle itself.
 const NEEDLE = '1' + '000';
