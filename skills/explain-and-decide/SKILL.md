@@ -1,6 +1,6 @@
 ---
 name: explain-and-decide
-description: Use from the first turn of every task, and before any text a person will read, from a question or answer to a report of work, results or errors, for the user or any audience whose knowledge is unknown. Use before presenting options, a plan or a recommendation, and whenever a decision is made or found, whether the user chose it, the agent chose it alone, however small or unspoken, or a meeting, email, thread, review or comment settled it. Enforces zero-knowledge framing (the reader knows nothing of the project, subject or work so far; define every term), at least one Pro and one Con on every option without exception, and an immediate append of every final decision to LEDGER.md by the bundled script. Binding on every turn and platform.
+description: Use from the first turn of every task, before writing text for any audience, before presenting or weighing options, and whenever a decision is made or found. Explain for a reader with no prior project knowledge. Give every option a benefit and a drawback, using natural sentences outside direct questions and formally recorded proposals. Follow explicit project conventions unless the user requests otherwise. Immediately append every final decision to LEDGER.md through the bundled script.
 ---
 
 # Explain and Decide
@@ -32,14 +32,17 @@ Whenever a decision, question, plan or recommendation is needed, whether it is p
 
 - NEVER present an option with no Con. A missing Con hides a trade-off.
 - NEVER present an option with no Pro. An option with no Pro should not be offered.
-- NEVER bury the Pro and Con inside a paragraph. Label them "Pro:" and "Con:".
-- ALWAYS write the Pro before the Con.
+- ALWAYS write the Pro before the Con. A Pro is a benefit; a Con is a drawback.
+- Outside direct questions and formally recorded proposals, use natural sentences that state the benefit followed by the caveat, rather than literal "Pro:" and "Con:" labels. For example: "We can keep the data in a local file for offline access, but it will stay on one machine."
+- In direct questions and formally recorded proposals, use "Pro:" then "Con:" labels by default.
+- Follow explicit project, environment or repository conventions for wording and structure instead of literal labels unless the user requests otherwise. Keep each option's benefit and drawback clear in that format.
+- Keep the ledger script's required `pro` and `con` entry keys and generated record format unchanged.
 - A plan with one proposed approach is an option. It gets a Pro and a Con like every other option.
 - A yes/no or confirmation question has two options, Yes and No. Each gets a Pro and a Con.
 
 ### In a structured question tool
 
-ALWAYS use the structured question tool when one is exposed (AskUserQuestion on Claude Code; request_user_input on Codex, offered in Plan mode), with "Pro: ... Con: ..." in each option's description. Shape of one question:
+ALWAYS use the structured question tool when one is exposed (AskUserQuestion on Claude Code; request_user_input on Codex, offered in Plan mode), with "Pro: ... Con: ..." in each option's description by default. Apply explicit project conventions or the user's requested format when they differ. Shape of one question:
 
 ```
 question: Where should the app keep its saved data?
@@ -51,9 +54,9 @@ options:
     description: Pro: reachable from every device. Con: needs an account and a network connection.
 ```
 
-### In plain text
+### Direct questions in plain text
 
-When no structured question tool is exposed, or a call to one is refused (always the case in sub-agents, sometimes in headless runs), use a numbered list, one Pro line and one Con line under each option, then STOP and wait:
+When no structured question tool is exposed, or a call to one is refused (always the case in sub-agents, sometimes in headless runs), use a numbered list with one Pro line and one Con line under each option by default. Apply explicit project conventions or the user's requested format when they differ, then STOP and wait:
 
 ```
 Where should the app keep its saved data?
@@ -224,6 +227,6 @@ Known limits: runs on different machines that share one LEDGER.md over a network
 ## Before you send or act, check
 
 1. Could a reader with no project knowledge follow every sentence? If no, rewrite.
-2. Does every option carry a Pro and then a Con? If no, add them.
+2. Does every option state a benefit and then a drawback in the appropriate format? Use natural sentences outside direct questions and formally recorded proposals. Follow explicit project conventions unless the user requests otherwise.
 3. Did a decision become final? If yes, append it to the ledger now, then continue.
 4. Did you take one approach without asking, or did material you read settle a choice? Ledger it now.

@@ -43,7 +43,7 @@ Only Claude Code and Codex were exercised on the machine this repository was bui
 
 ## Complete installation
 
-Every host needs the core folder `explain-and-decide/` and both helper folders, `explain-and-decide-help/` and `explain-and-decide-ledger/`. Keep them as siblings and retain the core `scripts/` directory. The table's rules-file rows describe how mandates load; copying a rule alone does not supply either helper. Follow [the complete skill bundle instructions](../INSTALL.md#complete-skill-bundle) to retain all three folders. Hosts without native skill discovery can read each helper's `SKILL.md` on explicit request. Pro: the full instructions remain available across hosts. Con: file access does not provide native commands or automatic discovery.
+Every host needs the core folder `explain-and-decide/` and both helper folders, `explain-and-decide-help/` and `explain-and-decide-ledger/`. Keep them as siblings and retain the core `scripts/` directory. The table's rules-file rows describe how mandates load; copying a rule alone does not supply either helper. Follow [the complete skill bundle instructions](../INSTALL.md#complete-skill-bundle) to retain all three folders. Hosts without native skill discovery can read each helper's `SKILL.md` on explicit request. The full instructions remain available across hosts, but file access does not provide native commands or automatic discovery.
 
 ## Adapter Rule
 

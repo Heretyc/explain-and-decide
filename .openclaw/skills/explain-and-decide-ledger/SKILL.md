@@ -17,7 +17,7 @@ Run the script with `-info`. The script sits in the sibling core skill folder, `
 Read LEDGER.md. Each entry carries a Date (the supplied event time, or the script invocation time when omitted), a Status (Draft, Proposed, Approved, Rejected or Deprecated), the deciders, a Context, the chosen option with its rationale and consequences, and every option's Pro and Con.
 
 - Group entries by Status. Surface Deprecated and Rejected entries first, since a reader who misses them acts on a decision that no longer holds.
-- For each decision show its title, the chosen option, and the Pro and Con that drove the choice.
+- For each decision show its title, the chosen option, and the benefit and drawback that drove the choice. Use natural sentences in review commentary; use labels by default for direct questions and formally recorded proposals. Follow explicit project, environment or repository conventions unless the user requests otherwise. Preserve the format of quoted entries.
 - Quote the Context in plain language and define any term the entry uses.
 - Never paraphrase a decision without its Con. A decision shown with only its benefit misleads.
 - A search such as "why did we choose X" returns the matching entries in full, never a one-line digest.

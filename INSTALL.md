@@ -30,9 +30,9 @@ mkdir -p ~/.codex/skills
 cp -R skills/explain-and-decide skills/explain-and-decide-help skills/explain-and-decide-ledger ~/.codex/skills/
 ```
 
-Use the command for your host. Pro: the core and both helpers are installed together without a marketplace. Con: updates must be copied by hand.
+Use the command for your host. The core and both helpers are installed together without a marketplace, but updates must be copied by hand.
 
-For a host using only rules files, retain all three folders under `skills/` in the project alongside the matching rules file. Copy the commands too where the host uses them. If there is no native skill discovery, explicitly ask the agent to read `skills/explain-and-decide-help/SKILL.md` for help or `skills/explain-and-decide-ledger/SKILL.md` for ledger review. Pro: the helper instructions remain accessible through files. Con: copying files alone does not create native commands or automatic skill discovery.
+For a host using only rules files, retain all three folders under `skills/` in the project alongside the matching rules file. Copy the commands too where the host uses them. If there is no native skill discovery, explicitly ask the agent to read `skills/explain-and-decide-help/SKILL.md` for help or `skills/explain-and-decide-ledger/SKILL.md` for ledger review. The helper instructions remain accessible through files, but copying files alone does not create native commands or automatic skill discovery.
 
 After installation, check that all three `SKILL.md` files and the core script are present. On hosts with skill discovery, verify that both helpers appear in the skill list. On other hosts, verify that the agent can read both helper files at the paths above.
 
@@ -83,7 +83,7 @@ Reads [`.github/plugin/plugin.json`](.github/plugin/plugin.json) and [`.github/p
 pi install git:github.com/Heretyc/explain-and-decide
 ```
 
-Command form taken from the template. The template ships a Pi extension that injects its rules every turn; this repository ships no extension, so Pi gets the `skills/` folder and [`AGENTS.md`](AGENTS.md). Pro: nothing runs in the background. Con: the mandates arrive when the skill is loaded rather than being injected on every turn. The ledger script is at `<install path>/skills/explain-and-decide/scripts/ledger.ts`.
+Command form taken from the template. The template ships a Pi extension that injects its rules every turn; this repository ships no extension, so Pi gets the `skills/` folder and [`AGENTS.md`](AGENTS.md). Nothing runs in the background, but the mandates arrive when the skill is loaded rather than being injected on every turn. The ledger script is at `<install path>/skills/explain-and-decide/scripts/ledger.ts`.
 
 ## Kimi Code
 
@@ -102,7 +102,7 @@ Reads [`.claude-plugin/marketplace.json`](.claude-plugin/marketplace.json). In t
 
 The template publishes an npm package and a server plugin for OpenCode. This repository has neither. Instead, OpenCode reads [`AGENTS.md`](AGENTS.md) from the project root on its own, and the three commands live in [`.opencode/command/`](.opencode/command/) as Markdown files. Open this repository in OpenCode, or copy `AGENTS.md`, `.opencode/command/` and all three folders from `skills/` into your project. The command files do not replace the helper skills; retain the [complete skill bundle](#complete-skill-bundle). [`opencode.json`](opencode.json) is present so the folder is recognized as a configured project.
 
-Pro: nothing to install from npm and no plugin code runs. Con: the mandates come from the rules file and the skill, not from a per-turn injection.
+There is nothing to install from npm and no plugin code runs, but the mandates come from the rules file and the skill, not from a per-turn injection.
 
 Kilo Code is built on OpenCode and reads the same `AGENTS.md` from the project root or from `~/.config/kilo/AGENTS.md`. Retain all three skill folders in the project and use the explicit helper-file requests above when native skill discovery is unavailable.
 
@@ -186,7 +186,7 @@ Imports the three skills as `explain-and-decide:<skill>`. For the always-on rule
 
 The template installs two native hooks into Cursor. This repository ships a rules file instead: copy [`.cursor/rules/explain-and-decide.mdc`](.cursor/rules/explain-and-decide.mdc) into your project's `.cursor/rules/`. Its frontmatter sets `alwaysApply: true`, so the mandates are in every chat. Also retain all three skill folders using the [complete skill bundle](#complete-skill-bundle) instructions. Load the help or ledger helper by its file path when needed.
 
-Pro: nothing to install or trust, and the rule travels with the project. Con: Cursor has no slash commands from this repository, and the ledger script must be run from a checkout: clone the repository and use `node --experimental-strip-types "<checkout>/skills/explain-and-decide/scripts/ledger.ts"`.
+There is nothing to install or trust, and the rule travels with the project, but Cursor has no slash commands from this repository, and the ledger script must be run from a checkout: clone the repository and use `node --experimental-strip-types "<checkout>/skills/explain-and-decide/scripts/ledger.ts"`.
 
 ## Other agents (rules file only)
 
@@ -194,7 +194,7 @@ Windsurf, Cline, GitHub Copilot Chat (the editor extension, not the CLI above), 
 
 Kiro: copy `.kiro/steering/explain-and-decide.md` to `~/.kiro/steering/` (every project) or `.kiro/steering/` in one project. Its frontmatter sets `inclusion: always`.
 
-Pro of a rules file: it works on hosts that have no plugin or skill system at all. Con: native skill discovery is not provided by the rules file; the agent must load the retained helper files explicitly and run the bundled core script.
+A rules file works on hosts that have no plugin or skill system at all, but native skill discovery is not provided by the rules file; the agent must load the retained helper files explicitly and run the bundled core script.
 
 ## Uninstall
 

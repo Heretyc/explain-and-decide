@@ -16,8 +16,10 @@ Display this card. One-shot: change no state, append nothing to the ledger.
 | Mandate | What it requires | Why |
 |---|---|---|
 | Zero-knowledge framing | Write for a reader who knows nothing of the project; define each term on first use | Checks your own understanding; nobody agrees to what they did not grasp |
-| A Pro and a Con on every option | Label "Pro:" then "Con:" under each option, the recommended one included | A missing Con hides a trade-off; no Pro means do not offer it |
+| A Pro and a Con on every option | State the benefit then the drawback for every option, including the recommended one; use natural sentences outside direct questions and formally recorded proposals | A missing Con hides a trade-off; no Pro means do not offer it |
 | Ledger every decision | Append each final decision to LEDGER.md through the script, at once, one per run | Records what was chosen and why, for the user's eyes only |
+
+Use "Pro:" then "Con:" labels by default in direct questions and formally recorded proposals. Explicit project, environment or repository conventions for wording and structure take precedence unless the user requests otherwise. The ledger script still requires `pro` and `con` entry keys and keeps its generated record format.
 
 ## Ledger script
 

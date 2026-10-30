@@ -28,7 +28,7 @@ Every file in this repository, from the README to a command description, follows
 - ASCII only. No em dash, no en dash, no emoji, no typographic quotes.
 - A hyphen appears only inside a compound word (`zero-knowledge`), an identifier, a command flag or a path. It is never used as punctuation between clauses; use a period, a comma, a colon or parentheses.
 - Readers are assumed to know nothing about this project. Define every term on first use: skill, plugin, marketplace, decision ledger, hook, slash command.
-- Whenever options are presented, each option carries a Pro and then a Con, labeled as such. No exceptions, including the recommended option.
+- Whenever options are presented, each option carries a benefit and then a drawback, including the recommended option. Use natural sentences outside direct questions and formally recorded proposals. Use "Pro:" then "Con:" labels by default in those questions and proposals. Explicit project, environment or repository conventions for wording and structure take precedence unless the user requests otherwise. Keep the ledger script's required entry keys and generated record format unchanged.
 - No historical framing. Describe how things are, not how they came to be; version history lives in git.
 - No tool or model attribution anywhere: not in files, commits or pull request text.
 - No performance claims, no invented figures, no sponsors, no badges for services this project does not use.

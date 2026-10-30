@@ -20,10 +20,12 @@ Explain and Decide is a skill for AI coding agents. A skill is a text file of in
 Three mandates, always on:
 
 1. **Zero-knowledge framing.** Every question and every explanation is written for a reader who knows nothing about the project, the subject or the work so far. Every term is defined on first use.
-2. **A Pro and a Con on every option.** Whenever options are offered, to the user or weighed by the agent alone, each one carries at least one advantage and one disadvantage, labeled "Pro:" and "Con:", in that order. The recommended option gets a Con. The "do nothing" option gets a Pro.
+2. **A Pro and a Con on every option.** Whenever options are offered, to the user or weighed by the agent alone, each one carries at least one advantage and one disadvantage, in that order. Use natural sentences outside direct questions and formally recorded proposals. Use "Pro:" and "Con:" labels by default in those questions and proposals. Explicit project, environment or repository conventions for wording and structure take precedence unless the user requests otherwise. The ledger script still requires `pro` and `con` entry keys and preserves its generated record format. The recommended option gets a Con. The "do nothing" option gets a Pro.
 3. **A ledger entry for every decision.** Every decision that becomes final, whether the user made it, the agent made it alone, or a meeting or email settled it, is appended at once through the bundled script to the decision ledger, a private file named `LEDGER.md` at the top of the project.
 
-A question before and after the skill:
+An ordinary explanation can say: "We can keep the data in a local file for offline access, but it will stay on one machine." This states the benefit and drawback without labels.
+
+A question before and after the skill (using the default labels):
 
 > **Before:** "Should I put the cache in Redis or keep it inside the process?"
 

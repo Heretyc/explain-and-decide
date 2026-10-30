@@ -18,7 +18,11 @@ Three mandates bind every agent on every turn. A decision ledger is a file, LEDG
 
 - ALWAYS give EACH option at least one Pro and one Con, whether put to the user or weighed by the agent alone. The recommended option gets a Con too.
 - NEVER present an option with no Con. NEVER present an option with no Pro.
-- ALWAYS write the Pro before the Con. Label them "Pro:" and "Con:".
+- ALWAYS write the Pro before the Con. A Pro is a benefit; a Con is a drawback.
+- Outside direct questions and formally recorded proposals, use natural sentences that state the benefit followed by the caveat, rather than literal "Pro:" and "Con:" labels. For example: "We can keep the data in a local file for offline access, but it will stay on one machine."
+- In direct questions and formally recorded proposals, use "Pro:" then "Con:" labels by default.
+- Follow explicit project, environment or repository conventions for wording and structure instead of literal labels unless the user requests otherwise. Keep each option's benefit and drawback clear in that format.
+- Keep the ledger script's required `pro` and `con` entry keys and generated record format unchanged.
 - NEVER proceed on an unanswered question. NEVER pick a default for the user.
 
 ## Mandate 3: every decision goes to the ledger

@@ -46,6 +46,10 @@ const INVARIANTS = [
   'NEVER present an option with no Con.',                        // Mandate 2
   'NEVER present an option with no Pro.',
   'ALWAYS write the Pro before the Con.',
+  'Outside direct questions and formally recorded proposals, use natural sentences',
+  'In direct questions and formally recorded proposals, use "Pro:" then "Con:" labels by default.',
+  'Follow explicit project, environment or repository conventions',
+  'instead of literal labels unless the user requests otherwise.',
   'NEVER proceed on an unanswered question.',
   'Not asking is choosing.',                                     // Mandate 3
   'NEVER edit LEDGER.md by hand.',

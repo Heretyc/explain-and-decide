@@ -14,7 +14,7 @@ const { root, readBytes, mustExist, runNode } = require('./helpers');
 const BUILDER = 'scripts/build-skill-archive.js';
 const ARCHIVE = path.join(root, 'dist', 'explain-and-decide.skill');
 const EXPECTED = {
-  'explain-and-decide/SKILL.md': 16406,
+  'explain-and-decide/SKILL.md': 17190,
   'explain-and-decide/scripts/ledger.ts': 20215,
   'explain-and-decide/scripts/package.json': 23,
   'explain-and-decide/LICENSE': readBytes('LICENSE').length,
