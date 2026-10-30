@@ -8,7 +8,7 @@
   },
   "homepage": "https://github.com/Heretyc/explain-and-decide",
   "repository": "https://github.com/Heretyc/explain-and-decide",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "keywords": ["decisions", "ledger", "explanation", "productivity"],
   "skills": "./skills/",
   "interface": {

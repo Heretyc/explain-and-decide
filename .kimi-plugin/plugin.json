@@ -6,7 +6,7 @@
     "url": "https://github.com/Heretyc"
   },
   "homepage": "https://github.com/Heretyc/explain-and-decide",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "interface": {
     "displayName": "Explain and Decide",
     "shortDescription": "Plain explanations, a Pro and a Con on every option, and a private ledger of every decision."

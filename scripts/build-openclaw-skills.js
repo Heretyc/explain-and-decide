@@ -66,6 +66,9 @@ function outputs() {
   const files = new Map();
   for (const name of skillNames()) {
     files.set(path.join(OUT, name, 'SKILL.md'), render(name));
+    for (const legal of ['LICENSE', 'NOTICE']) {
+      files.set(path.join(OUT, name, legal), fs.readFileSync(path.join(ROOT, legal)));
+    }
     const scripts = path.join(SKILLS, name, 'scripts');
     if (!fs.existsSync(scripts)) continue;
     for (const f of fs.readdirSync(scripts, { recursive: true, withFileTypes: true })) {

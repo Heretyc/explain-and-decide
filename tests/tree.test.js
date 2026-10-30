@@ -44,10 +44,15 @@ test('the hidden limit appears only in ledger.ts, once per copy', () => {
   assert.deepEqual(hits, []);
 });
 
-test('LICENSE is MIT and names the author', () => {
+test('LICENSE is Apache 2.0 and NOTICE names the author', () => {
   const text = readText('LICENSE');
-  assert.ok(text.includes('MIT License'), 'LICENSE must contain "MIT License"');
-  assert.ok(text.includes('Heretyc'), 'LICENSE must name Heretyc');
+  assert.ok(text.includes('Apache License'), 'LICENSE must contain Apache License');
+  assert.ok(text.includes('Version 2.0, January 2004'), 'LICENSE must identify version 2.0');
+  assert.ok(text.includes('END OF TERMS AND CONDITIONS'), 'LICENSE must contain the full terms');
+  assert.ok(text.includes('Copyright 2026 Lexi Blackburn'), 'LICENSE must name the author');
+  const notice = readText('NOTICE');
+  assert.ok(notice.startsWith('explain-and-decide\n'), 'NOTICE must name this project');
+  assert.ok(notice.includes('Copyright 2026 Lexi Blackburn'), 'NOTICE must name the author');
 });
 
 test('no file named hooks.json anywhere', () => {

@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/license-MIT-111111?style=flat-square" alt="MIT license">
+  <img src="https://img.shields.io/badge/license-Apache--2.0-111111?style=flat-square" alt="Apache 2.0 license">
   <img src="https://img.shields.io/badge/node-%3E%3D%2022.6-111111?style=flat-square" alt="Node.js 22.6 or newer">
 </p>
 
@@ -229,4 +229,6 @@ In [skills/explain-and-decide/SKILL.md](skills/explain-and-decide/SKILL.md) unde
 
 ## License
 
-[MIT](LICENSE).
+Apache-2.0. Copyright 2026 Lexi Blackburn (https://github.com/Heretyc/).
+
+See [LICENSE](LICENSE) and [NOTICE](NOTICE).

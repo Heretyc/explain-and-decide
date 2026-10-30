@@ -17,6 +17,8 @@ const EXPECTED = {
   'explain-and-decide/SKILL.md': 15299,
   'explain-and-decide/scripts/ledger.ts': 18556,
   'explain-and-decide/scripts/package.json': 23,
+  'explain-and-decide/LICENSE': readBytes('LICENSE').length,
+  'explain-and-decide/NOTICE': readBytes('NOTICE').length,
 };
 
 // Central directory entries: [name, crc32, uncompressed size].
@@ -58,7 +60,9 @@ test('build-skill-archive.js writes the archive and listZipEntries matches its c
   for (const [name, crc, size] of parsed) {
     assert.equal(name.split('/')[0], 'explain-and-decide', `${name} is not under the skill folder`);
     assert.equal(size, EXPECTED[name], `${name} size`);
-    const bytes = readBytes(path.join('skills', ...name.split('/')));
+    const rel = name.slice('explain-and-decide/'.length);
+    const bytes = readBytes(rel === 'LICENSE' || rel === 'NOTICE'
+      ? rel : path.join('skills', ...name.split('/')));
     assert.equal(bytes.length, EXPECTED[name], `${name} source size`);
     assert.equal(crc, zlib.crc32(bytes), `${name} CRC-32`);
   }

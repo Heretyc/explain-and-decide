@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Build dist/explain-and-decide.skill, a ZIP archive holding the core skill
-// (SKILL.md, scripts/ledger.ts and scripts/package.json, which marks the script
+// (LICENSE, NOTICE, SKILL.md, scripts/ledger.ts and scripts/package.json, which marks the script
 // as an ES module, under one explain-and-decide/ folder) for
 // hosts that install a skill from a single archive file. Node built-ins only:
 // the ZIP container is written by hand and entries are compressed with deflate.
@@ -15,7 +15,7 @@ const ROOT = path.join(__dirname, '..');
 const SKILL = 'explain-and-decide';
 const SRC = path.join(ROOT, 'skills', SKILL);
 const OUT = path.join(ROOT, 'dist', `${SKILL}.skill`);
-const FILES = ['SKILL.md', 'scripts/ledger.ts', 'scripts/package.json'];
+const FILES = ['SKILL.md', 'scripts/ledger.ts', 'scripts/package.json', 'LICENSE', 'NOTICE'];
 
 const LOCAL_SIG = 0x04034b50;
 const CENTRAL_SIG = 0x02014b50;
@@ -95,7 +95,7 @@ function listZipEntries(file) {
 
 function build() {
   const entries = FILES.map((rel) => {
-    const abs = path.join(SRC, rel);
+    const abs = path.join(rel === 'LICENSE' || rel === 'NOTICE' ? ROOT : SRC, rel);
     return { name: `${SKILL}/${rel}`, data: fs.readFileSync(abs), mtime: fs.statSync(abs).mtime };
   });
   const zip = buildZip(entries);
