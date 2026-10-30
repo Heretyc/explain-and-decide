@@ -1,0 +1,49 @@
+{
+  "name": "explain-and-decide",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A skill, meaning a reusable instruction set for AI coding agents, that enforces explanations readable with zero prior knowledge, a Pro and a Con on every option, and a local ledger entry for every decision.",
+  "license": "MIT",
+  "author": {
+    "name": "Heretyc",
+    "url": "https://github.com/Heretyc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Heretyc/explain-and-decide.git"
+  },
+  "homepage": "https://github.com/Heretyc/explain-and-decide",
+  "bugs": {
+    "url": "https://github.com/Heretyc/explain-and-decide/issues"
+  },
+  "keywords": [
+    "explain-and-decide",
+    "skills",
+    "agent-skill",
+    "decision-ledger",
+    "pi-package",
+    "pi",
+    "opencode",
+    "qoder"
+  ],
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "check": "node scripts/check-rule-copies.js && node scripts/check-versions.js",
+    "build": "node scripts/build-openclaw-skills.js && node scripts/build-skill-archive.js"
+  },
+  "pi": {
+    "skills": ["./skills"]
+  },
+  "files": [
+    "AGENTS.md",
+    "skills/",
+    "commands/",
+    ".opencode/",
+    ".qoder/",
+    ".qoder-plugin/",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=22.6"
+  }
+}

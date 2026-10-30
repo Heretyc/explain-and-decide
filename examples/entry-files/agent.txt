@@ -1,0 +1,13 @@
+title: Test runner for the to-do list app
+context: The app needs automated tests and no test runner is set up. A test runner is the program that finds the tests and runs them.
+opt: The test runner built into Node.js
+pro: Ships with Node.js, nothing to install
+con: Fewer reporting features than a dedicated framework
+opt: A third-party test framework
+pro: Rich assertions and detailed reports
+con: One more dependency to install and keep current
+pick: 1
+why: the project rules prefer tools that need no installation
+plus: Zero new dependencies
+minus: Plainer test output
+by: Claude Code

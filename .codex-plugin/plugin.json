@@ -1,0 +1,31 @@
+{
+  "name": "explain-and-decide",
+  "version": "1.0.0",
+  "description": "Rules for AI coding agents: explain everything for a reader who knows nothing about the project, give every option a Pro and a Con, and record every decision in LEDGER.md, a private decision ledger kept out of version control.",
+  "author": {
+    "name": "Heretyc",
+    "url": "https://github.com/Heretyc"
+  },
+  "homepage": "https://github.com/Heretyc/explain-and-decide",
+  "repository": "https://github.com/Heretyc/explain-and-decide",
+  "license": "MIT",
+  "keywords": ["decisions", "ledger", "explanation", "productivity"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Explain and Decide",
+    "shortDescription": "Plain explanations, balanced options, recorded decisions",
+    "longDescription": "Write every question and explanation for a reader who knows nothing about the project, give each option at least one Pro and one Con, and append every decision to LEDGER.md, a private decision ledger, through the bundled script.",
+    "developerName": "Heretyc",
+    "category": "Productivity",
+    "capabilities": ["Instructions"],
+    "websiteURL": "https://github.com/Heretyc/explain-and-decide",
+    "defaultPrompt": [
+      "Explain this change as if I know nothing about the project.",
+      "List the options for this decision, each with a Pro and a Con.",
+      "Record the decision we just made in the ledger."
+    ],
+    "brandColor": "#111111",
+    "composerIcon": "./assets/codex-icon.png",
+    "logo": "./assets/logo.png"
+  }
+}

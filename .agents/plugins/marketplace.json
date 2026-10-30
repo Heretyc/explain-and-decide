@@ -1,0 +1,21 @@
+{
+  "name": "explain-and-decide",
+  "interface": {
+    "displayName": "Explain and Decide"
+  },
+  "plugins": [
+    {
+      "name": "explain-and-decide",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/Heretyc/explain-and-decide.git",
+        "ref": "main"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

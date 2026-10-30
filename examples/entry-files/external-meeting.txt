@@ -1,0 +1,15 @@
+title: Release cadence for the to-do list app
+context: The team had to settle how often finished work is released to users.
+opt: Release every two weeks on a fixed day
+pro: Users and the team know exactly when changes arrive
+con: A finished fix can wait up to two weeks
+opt: Release each change as soon as it is finished
+pro: Fixes reach users immediately
+con: Users see changes at unpredictable times and the team must be ready to release at any moment
+pick: 1
+why: the team wants predictable dates for support and announcements
+plus: Support staff can prepare notes before each release day
+minus: Urgent fixes need a separate process outside the cycle
+deciders: Product team
+meeting: Planning sync
+on: 2026-10-28T09:00:00-07:00

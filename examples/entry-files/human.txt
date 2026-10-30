@@ -1,0 +1,13 @@
+title: Where the to-do list app keeps its data
+context: The to-do list app must keep each person's tasks between runs of the program.
+opt: A local file on the user's computer
+pro: Works with no internet connection and no account
+con: The tasks exist on one computer only
+opt: A hosted database
+pro: The same tasks appear on every device the person signs in from
+con: Needs an account, a server and a network connection
+pick: 1
+why: the app has one user per installation and must work offline
+plus: Nothing to host and no accounts to manage
+minus: Tasks do not follow the user to a second computer
+by: Sam

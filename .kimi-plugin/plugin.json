@@ -1,0 +1,16 @@
+{
+  "name": "explain-and-decide",
+  "description": "Rules for AI coding agents: explain everything for a reader who knows nothing about the project, give every option a Pro and a Con, and record every decision in LEDGER.md, a private decision ledger kept out of version control.",
+  "author": {
+    "name": "Heretyc",
+    "url": "https://github.com/Heretyc"
+  },
+  "homepage": "https://github.com/Heretyc/explain-and-decide",
+  "license": "MIT",
+  "interface": {
+    "displayName": "Explain and Decide",
+    "shortDescription": "Plain explanations, a Pro and a Con on every option, and a private ledger of every decision."
+  },
+  "skills": "./skills/",
+  "systemPromptPath": "./AGENTS.md"
+}

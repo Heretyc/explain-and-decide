@@ -1,0 +1,16 @@
+{
+  "name": "explain-and-decide",
+  "description": "Plain explanations, a Pro and a Con on every option, and a private ledger of every decision for AI coding agents.",
+  "owner": {
+    "name": "Heretyc",
+    "url": "https://github.com/Heretyc"
+  },
+  "plugins": [
+    {
+      "name": "explain-and-decide",
+      "description": "Zero-knowledge explanations, balanced options and a private decision ledger, shipped as skills.",
+      "source": "./skills",
+      "category": "productivity"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+node_modules/
+.env
+.env.*
+!.env.example
+.claude/settings.local.json
+dist/
+*.skill
+.openclaw/.cache/
+__pycache__/
+/.no-ledger
+# The sample ledger under examples/ is published on purpose.
+!/examples/LEDGER.md

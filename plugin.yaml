@@ -1,0 +1,12 @@
+name: explain-and-decide
+version: 1.0.0
+description: Zero-knowledge explanations, a Pro and a Con on every option, and a private decision ledger for Hermes Agent, with bundled skills and slash commands.
+author: Heretyc
+provides_commands:
+  - explain-and-decide
+  - explain-and-decide-help
+  - explain-and-decide-ledger
+provides_skills:
+  - explain-and-decide
+  - explain-and-decide-help
+  - explain-and-decide-ledger

@@ -1,0 +1,16 @@
+title: Name shown in the browser tab
+context: The browser tab needs a short title and two candidates were in circulation.
+opt: Tasks
+pro: Short and fits in a narrow tab
+con: Generic and easy to confuse with other apps
+opt: My Day Planner
+pro: Describes what the app is for
+con: Long enough to be cut off in a narrow tab
+pick: 2
+why: the sponsor prefers a name that explains itself to a first-time visitor
+plus: New visitors understand the tab without opening it
+minus: The title is truncated when many tabs are open
+deciders: Dana (project sponsor)
+subject: Final answer on the tab title
+on: 2026-10-27T16:30:00+01:00
+from: dana@example.com
