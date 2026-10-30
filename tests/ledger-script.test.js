@@ -8,7 +8,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const { spawnSync } = require('node:child_process');
-const { runLedger, makeTempDir, gitAvailable } = require('./helpers');
+const { runLedger, makeTempDir, gitAvailable, ledgerScript } = require('./helpers');
 
 const PREAMBLE = (folder) => [
   `# DECISIONS LEDGER FOR ${folder}`,
@@ -66,14 +66,110 @@ test('no arguments: exit 2 and usage on stdout', (t) => {
   assert.match(r.stdout, /^usage:/m);
 });
 
-test('-h and --help: exit 0, at most 24 lines', (t) => {
+test('-h and --help: exit 0, at most 25 lines', (t) => {
   for (const sw of ['-h', '--help']) {
     const r = runLedger([sw], { cwd: makeTempDir(t) });
     assert.equal(r.status, 0, sw);
     assert.match(r.stdout, /^usage:/m);
     const lines = r.stdout.replace(/\n$/, '').split('\n').length;
-    assert.ok(lines <= 24, `${sw} printed ${lines} lines`);
+    assert.ok(lines <= 25, `${sw} printed ${lines} lines`);
+    assert.match(r.stdout, /--at datetime/);
+    assert.match(r.stdout, /default: invocation time/);
   }
+});
+
+test('--at preserves event times in all decision modes and both input forms', (t) => {
+  const stamps = ['2026-10-28T09:00:00-07:00', '2024-02-29T23:59:59.123456Z',
+    '2026-10-28T09:00+05:30', '2026-10-28T09:00:00-0330', '2000-02-29T00:00Z'];
+  for (const [mode, entry] of [['human', human()], ['agent', agent()],
+    ['external', external('meeting: Planning\non: 2026-10-27T10:30:00Z\n')]]) {
+    for (const stamp of stamps) {
+      for (const form of ['stdin', 'file-before', 'file-after']) {
+        const dir = makeTempDir(t);
+        const file = path.join(dir, 'entry.txt');
+        const args = [`-decision-${mode}`];
+        if (form !== 'stdin') fs.writeFileSync(file, entry);
+        if (form === 'file-before') args.push(file);
+        args.push('--at', stamp);
+        if (form === 'file-after') args.push(file);
+        const r = runLedger(args, { cwd: dir, input: form === 'stdin' ? entry : undefined });
+        assert.equal(r.status, 0, `${mode} ${form} ${stamp}: ${r.stderr}`);
+        const saved = readLedger(dir);
+        assert.ok(saved.includes(`* **Date:** ${stamp}\n`));
+        if (mode === 'external') assert.match(saved, /took place on 2026-10-27T10:30:00Z/);
+      }
+    }
+  }
+});
+
+test('--at rejects invalid dates, clocks and absent timezones without changing the ledger', (t) => {
+  const dir = makeTempDir(t);
+  appendOk(dir, '-decision-human', human());
+  const before = readLedger(dir);
+  const invalid = ['', 'today', '2026-10-28', '2026-10-28T09:00:00',
+    '2026-02-29T09:00Z', '1900-02-29T09:00Z', '2026-04-31T09:00Z',
+    '2026-00-10T09:00Z', '2026-13-10T09:00Z', '2026-10-00T09:00Z',
+    '2026-10-28T24:00Z', '2026-10-28T09:60Z', '2026-10-28T09:00:60Z',
+    '2026-10-28T09:00+24:00', '2026-10-28T09:00-07:60',
+    '2026-10-28T09:00+07', '2026-10-28T09:00.5Z', '2026-10-28T09:00Z\n'];
+  for (const stamp of invalid) {
+    const r = runLedger(['-decision-human', '--at', stamp], { cwd: dir, input: human() });
+    assert.equal(r.status, 1, JSON.stringify(stamp));
+    assert.match(r.stderr, /--at:.*ISO8601.*timezone/);
+    assert.equal(readLedger(dir), before);
+  }
+  const fresh = makeTempDir(t);
+  assert.equal(runLedger(['-decision-agent', '--at', 'bad'], { cwd: fresh, input: agent() }).status, 1);
+  assert.ok(!fs.existsSync(ledgerPath(fresh)));
+});
+
+test('--at misuse exits 2 before writes, including marker changes', (t) => {
+  for (const args of [
+    ['-decision-human', '--at'], ['-decision-human', '--at', '--at'],
+    ['-decision-human', '--at', '2026-10-28T09:00Z', '--at', '2026-10-29T09:00Z'],
+    ['-decision-human', '--unknown'],
+    ...['-info', '-no-ledger', '-yes-ledger'].map(sw => [sw, '--at', '2026-10-28T09:00Z']),
+  ]) {
+    const dir = makeTempDir(t);
+    fs.writeFileSync(path.join(dir, '.no-ledger'), 'disabled\n');
+    const r = runLedger(args, { cwd: dir, input: human() });
+    assert.equal(r.status, 2, args.join(' '));
+    assert.ok(!fs.existsSync(ledgerPath(dir)));
+    assert.equal(fs.readFileSync(path.join(dir, '.no-ledger'), 'utf8'), 'disabled\n');
+  }
+});
+
+test('omitted --at captures invocation time before entry-file input is read', (t) => {
+  const dir = makeTempDir(t);
+  const file = path.join(dir, 'entry.txt');
+  fs.writeFileSync(file, human());
+  // Advance the clock when the entry file is read, so an append-time default fails.
+  const preload = path.join(dir, 'clock.cjs');
+  fs.writeFileSync(preload, `
+    const fs = require('node:fs');
+    const RealDate = Date;
+    let now = '2026-10-28T09:00:00Z';
+    global.Date = class extends RealDate {
+      constructor(...args) { super(...(args.length ? args : [now])); }
+    };
+    const read = fs.readFileSync;
+    fs.readFileSync = function (file, ...args) {
+      if (String(file) === ${JSON.stringify(file)}) now = '2026-10-28T12:00:00Z';
+      return read.call(this, file, ...args);
+    };
+  `);
+  const r = spawnSync(process.execPath, ['--experimental-strip-types', '--require', preload,
+    ledgerScript, '-decision-human', file], { cwd: dir, encoding: 'utf8', env: { ...process.env, TZ: 'UTC' } });
+  assert.equal(r.status, 0, r.stderr);
+  assert.match(readLedger(dir), /\* \*\*Date:\*\* 2026-10-28T09:00:00Z/);
+});
+
+test('disabled ledger still refuses an explicit event time', (t) => {
+  const dir = makeTempDir(t);
+  fs.writeFileSync(path.join(dir, '.no-ledger'), 'disabled\n');
+  const r = runLedger(['-decision-human', '--at', '2026-10-28T09:00Z'], { cwd: dir, input: human() });
+  assert.equal(r.status, 3);
+  assert.ok(!fs.existsSync(ledgerPath(dir)));
 });
 
 test('misuse exits 2: unknown switch, extra positional, unreadable entry file', (t) => {

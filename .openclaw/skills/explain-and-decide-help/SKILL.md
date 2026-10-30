@@ -25,12 +25,19 @@ The script sits in the sibling core skill folder, not in this one. Claude Code, 
 | `-decision-human [entry-file]` | Append a decision the user made |
 | `-decision-agent [entry-file]` | Append a decision the agent made alone |
 | `-decision-external [entry-file]` | Append a decision from a meeting, email, thread or comment |
+| `--at datetime` (decision switches only) | Set the event Date; default is script invocation time |
 | `-info` | Print the LEDGER.md path and size, and a notice when disabled |
 | `-no-ledger` | Disable the ledger for this project (creates `.no-ledger`) |
 | `-yes-ledger` | Enable it again (removes `.no-ledger`) |
 | none, `-h`, `--help` | Print help |
 
 Entry text comes from the entry file, else from standard input (quoted bash heredoc, or PowerShell single-quoted here-string piped in). Exit codes: 0 appended; 1 rejected, nothing written; 2 misuse or unreadable entry file; 3 ledger disabled; 4 LEDGER.md could not be written (locked by another program, read-only or full), nothing recorded unless the line says written but not confirmed. LEDGER.md sits in the project root and is private: the script lists it in `.git/info/exclude` so it never reaches a repository. Each run only appends its own entry, so many agents may write at once.
+
+The optional `--at datetime` argument sets the entry's **Date** to when the decision happened. It works with all three decision switches, before or after the entry-file path. Omit it to use the time the script was invoked, captured before reading input. Supply an ISO 8601 calendar datetime (a numeric date and time) with an explicit time zone: `YYYY-MM-DDTHH:mm[:ss[.fraction]]` followed by `Z` (Coordinated Universal Time, UTC) or an offset such as `-07:00` or `+0530`. Square brackets here mean optional parts. The script preserves the supplied value and offset. Invalid calendar dates, clock times and missing time zones are rejected with exit 1 before writing. A missing or repeated `--at` argument, or its use with a non-decision switch, exits 2. The external-source `on` field still describes the meeting or email time; it does not set the entry's Date.
+
+```bash
+node --experimental-strip-types "<core skill folder>/scripts/ledger.ts" -decision-agent entry.txt --at "2026-10-28T09:00:00-07:00"
+```
 
 ## Entry keys
 

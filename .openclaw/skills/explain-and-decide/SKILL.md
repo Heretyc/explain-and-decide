@@ -105,12 +105,19 @@ The project root is the git top level of the current directory, else the current
 | Switch | Effect |
 |---|---|
 | `-decision-human`, `-decision-agent`, `-decision-external`, each with optional `[entry-file]` | Append one decision from that source (Mandate 3); exit 4 when LEDGER.md cannot be written |
+| `--at datetime` (decision switches only) | Set the event Date; default is script invocation time |
 | `-info` | Print the ledger path and size, plus a line when logging is disabled |
 | `-no-ledger` | Disable the ledger for this project (creates `.no-ledger`) |
 | `-yes-ledger` | Enable the ledger again (removes `.no-ledger`) |
 | none, `-h`, `--help` | Print help |
 
 Entry text comes from the entry-file when given, else from standard input.
+
+The optional `--at datetime` argument sets the entry's **Date** to when the decision happened. It works with all three decision switches, before or after the entry-file path. Omit it to use the time the script was invoked, captured before reading input. Supply an ISO 8601 calendar datetime (a numeric date and time) with an explicit time zone: `YYYY-MM-DDTHH:mm[:ss[.fraction]]` followed by `Z` (Coordinated Universal Time, UTC) or an offset such as `-07:00` or `+0530`. Square brackets here mean optional parts. The script preserves the supplied value and offset. Invalid calendar dates, clock times and missing time zones are rejected with exit 1 before writing. A missing or repeated `--at` argument, or its use with a non-decision switch, exits 2. The external-source `on` field still describes the meeting or email time; it does not set the entry's Date.
+
+```bash
+node --experimental-strip-types "<core skill folder>/scripts/ledger.ts" -decision-agent entry.txt --at "2026-10-28T09:00:00-07:00"
+```
 
 ### Entry grammar
 

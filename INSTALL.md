@@ -2,11 +2,41 @@
 
 Terms used below. Explain and Decide binds an AI coding agent to three mandates, rules it follows on every task: zero-knowledge framing (every question and explanation is written for a reader who knows nothing of the project), a Pro and a Con on every option, and a ledger entry for every decision (a record appended to `LEDGER.md`, the project's private decision ledger). A host is the agent program that loads these rules. A skill is a folder holding a `SKILL.md` instruction file that an agent loads when a task needs it. A plugin is a packaged set of skills a host installs with one command. A marketplace is a catalog of plugins; this repository serves as its own marketplace. A rules file is a text file a host reads into every session without being asked. A slash command is a short instruction typed with a leading `/`. A hook is a program a host runs automatically at a lifecycle event; this repository ships none. The template is the ponytail repository (https://github.com/DietrichGebert/ponytail), a skill for the same hosts whose adapter files this repository follows.
 
-Pick your agent below. Not listed? Most agents read [`AGENTS.md`](AGENTS.md), the compact statement of the three mandates: copy it into your project, or ask your agent to install [`skills/explain-and-decide/SKILL.md`](skills/explain-and-decide/SKILL.md) as a skill. Which files map to which agent: [Agent portability](docs/agent-portability.md).
+Pick your agent below. Not listed? Most agents read [`AGENTS.md`](AGENTS.md), the compact statement of the three mandates: copy it into your project and retain the [complete skill bundle](#complete-skill-bundle), including both helpers. Which files map to which agent: [Agent portability](docs/agent-portability.md).
 
 The ledger script, `skills/explain-and-decide/scripts/ledger.ts`, runs on Node.js, so `node` must be on your PATH (for Nix or nvm users: on the non-interactive shell's PATH). Always pass the `--experimental-strip-types` flag: older releases need it to run a `.ts` file, and every release from 22.6 on accepts it. Without Node the mandates still apply, but no decision can be recorded.
 
 Only Claude Code and Codex were exercised on the machine this repository was built on. Every other host below ships on the strength of the template formats it mirrors; its command lines are taken from that template with this repository's identifiers substituted. If a command differs on your version of the host, the rules file and the skill folder still install by hand.
+
+## Complete skill bundle
+
+Every installation needs these three sibling folders. The helpers locate the ledger script through the neighboring core folder, so keep their names and relative positions.
+
+| Folder | Purpose |
+|---|---|
+| `explain-and-decide/` | Core instructions and `scripts/ledger.ts`, with its `scripts/package.json` file |
+| `explain-and-decide-help/` | Help card with switches, event timestamps and entry keys |
+| `explain-and-decide-ledger/` | Review decisions and record entries by hand |
+
+For a manual install, copy all three folders from `skills/` into the host's skill directory. Do not copy just the core `SKILL.md`. For example, run one of these commands from this repository after creating the destination directory:
+
+```bash
+# Claude Code
+mkdir -p ~/.claude/skills
+cp -R skills/explain-and-decide skills/explain-and-decide-help skills/explain-and-decide-ledger ~/.claude/skills/
+
+# Codex
+mkdir -p ~/.codex/skills
+cp -R skills/explain-and-decide skills/explain-and-decide-help skills/explain-and-decide-ledger ~/.codex/skills/
+```
+
+Use the command for your host. Pro: the core and both helpers are installed together without a marketplace. Con: updates must be copied by hand.
+
+For a host using only rules files, retain all three folders under `skills/` in the project alongside the matching rules file. Copy the commands too where the host uses them. If there is no native skill discovery, explicitly ask the agent to read `skills/explain-and-decide-help/SKILL.md` for help or `skills/explain-and-decide-ledger/SKILL.md` for ledger review. Pro: the helper instructions remain accessible through files. Con: copying files alone does not create native commands or automatic skill discovery.
+
+After installation, check that all three `SKILL.md` files and the core script are present. On hosts with skill discovery, verify that both helpers appear in the skill list. On other hosts, verify that the agent can read both helper files at the paths above.
+
+The generated `dist/explain-and-decide.skill` archive contains only the core skill. Installing that archive alone is incomplete; copy both helper folders next to its installed core folder, or use the complete plugin or manual bundle.
 
 ## Claude Code
 
@@ -70,11 +100,11 @@ Reads [`.claude-plugin/marketplace.json`](.claude-plugin/marketplace.json). In t
 
 ## OpenCode
 
-The template publishes an npm package and a server plugin for OpenCode. This repository has neither. Instead, OpenCode reads [`AGENTS.md`](AGENTS.md) from the project root on its own, and the three commands live in [`.opencode/command/`](.opencode/command/) as Markdown files. Open this repository in OpenCode, or copy `AGENTS.md` and `.opencode/command/` into your project. [`opencode.json`](opencode.json) is present so the folder is recognized as a configured project.
+The template publishes an npm package and a server plugin for OpenCode. This repository has neither. Instead, OpenCode reads [`AGENTS.md`](AGENTS.md) from the project root on its own, and the three commands live in [`.opencode/command/`](.opencode/command/) as Markdown files. Open this repository in OpenCode, or copy `AGENTS.md`, `.opencode/command/` and all three folders from `skills/` into your project. The command files do not replace the helper skills; retain the [complete skill bundle](#complete-skill-bundle). [`opencode.json`](opencode.json) is present so the folder is recognized as a configured project.
 
 Pro: nothing to install from npm and no plugin code runs. Con: the mandates come from the rules file and the skill, not from a per-turn injection.
 
-Kilo Code is built on OpenCode and reads the same `AGENTS.md` from the project root or from `~/.config/kilo/AGENTS.md`.
+Kilo Code is built on OpenCode and reads the same `AGENTS.md` from the project root or from `~/.config/kilo/AGENTS.md`. Retain all three skill folders in the project and use the explicit helper-file requests above when native skill discovery is unavailable.
 
 Ledger script: `<path to this repository>/skills/explain-and-decide/scripts/ledger.ts`.
 
@@ -115,7 +145,7 @@ Reads [`plugin.yaml`](plugin.yaml) and [`__init__.py`](__init__.py); the bundled
 
 ## CodeWhale
 
-Reads `AGENTS.md` from the project root, zero setup. Copy [`AGENTS.md`](AGENTS.md) to your project, or run `codewhale` from a checkout. Ledger script: `<path to this repository>/skills/explain-and-decide/scripts/ledger.ts`.
+Reads `AGENTS.md` from the project root, zero setup. Copy [`AGENTS.md`](AGENTS.md) and the [complete skill bundle](#complete-skill-bundle) to your project, or run `codewhale` from a checkout. Load either helper by its file path when needed. Ledger script: `<path to this repository>/skills/explain-and-decide/scripts/ledger.ts`.
 
 ## Devin CLI
 
@@ -127,7 +157,7 @@ Reads [`.devin-plugin/plugin.json`](.devin-plugin/plugin.json); skills are avail
 
 ## OpenClaw
 
-The template installs from ClawHub, a public skill registry, with `clawhub install <skill>`. This repository is not on ClawHub, so copy the generated skill folders from [`.openclaw/skills/`](.openclaw/skills/) into `~/.openclaw/skills/`. They are produced from `skills/` by `node scripts/build-openclaw-skills.js`. Ledger script: `~/.openclaw/skills/explain-and-decide/scripts/ledger.ts` when the folder is copied whole, else the path of your checkout.
+The template installs from ClawHub, a public skill registry, with `clawhub install <skill>`. This repository is not on ClawHub, so copy all three generated skill folders (`explain-and-decide`, `explain-and-decide-help`, `explain-and-decide-ledger`) from [`.openclaw/skills/`](.openclaw/skills/) into `~/.openclaw/skills/`. Keep them as siblings, including the core folder's `scripts/` directory. They are produced from `skills/` by `node scripts/build-openclaw-skills.js`. Ledger script: `~/.openclaw/skills/explain-and-decide/scripts/ledger.ts` when the folder is copied whole, else the path of your checkout.
 
 ## Grok Build
 
@@ -154,17 +184,17 @@ Imports the three skills as `explain-and-decide:<skill>`. For the always-on rule
 
 ## Cursor
 
-The template installs two native hooks into Cursor. This repository ships a rules file instead: copy [`.cursor/rules/explain-and-decide.mdc`](.cursor/rules/explain-and-decide.mdc) into your project's `.cursor/rules/`. Its frontmatter sets `alwaysApply: true`, so the mandates are in every chat.
+The template installs two native hooks into Cursor. This repository ships a rules file instead: copy [`.cursor/rules/explain-and-decide.mdc`](.cursor/rules/explain-and-decide.mdc) into your project's `.cursor/rules/`. Its frontmatter sets `alwaysApply: true`, so the mandates are in every chat. Also retain all three skill folders using the [complete skill bundle](#complete-skill-bundle) instructions. Load the help or ledger helper by its file path when needed.
 
 Pro: nothing to install or trust, and the rule travels with the project. Con: Cursor has no slash commands from this repository, and the ledger script must be run from a checkout: clone the repository and use `node --experimental-strip-types "<checkout>/skills/explain-and-decide/scripts/ledger.ts"`.
 
 ## Other agents (rules file only)
 
-Windsurf, Cline, GitHub Copilot Chat (the editor extension, not the CLI above), Aider, Kiro, Zed, Antigravity IDE, VS Code with the Codex extension, JetBrains Junie, Amp and Jules read a rules file. Copy the matching file from this repository: [`.windsurf/rules/`](.windsurf/rules/), [`.clinerules/`](.clinerules/), [`.github/copilot-instructions.md`](.github/copilot-instructions.md), [`.agents/rules/`](.agents/rules/), [`.kiro/steering/`](.kiro/steering/) or [`AGENTS.md`](AGENTS.md). Every copy carries the same text as `AGENTS.md`; `npm run check` proves it.
+Windsurf, Cline, GitHub Copilot Chat (the editor extension, not the CLI above), Aider, Kiro, Zed, Antigravity IDE, VS Code with the Codex extension, JetBrains Junie, Amp and Jules read a rules file. Copy the matching file from this repository: [`.windsurf/rules/`](.windsurf/rules/), [`.clinerules/`](.clinerules/), [`.github/copilot-instructions.md`](.github/copilot-instructions.md), [`.agents/rules/`](.agents/rules/), [`.kiro/steering/`](.kiro/steering/) or [`AGENTS.md`](AGENTS.md). Every copy carries the same text as `AGENTS.md`; `npm run check` proves it. Also copy the [complete skill bundle](#complete-skill-bundle) into the project, including both helpers. A rules file alone does not install them.
 
 Kiro: copy `.kiro/steering/explain-and-decide.md` to `~/.kiro/steering/` (every project) or `.kiro/steering/` in one project. Its frontmatter sets `inclusion: always`.
 
-Pro of a rules file: it works on hosts that have no plugin or skill system at all. Con: it carries only the mandates; the agent needs a checkout of this repository to run the ledger script.
+Pro of a rules file: it works on hosts that have no plugin or skill system at all. Con: native skill discovery is not provided by the rules file; the agent must load the retained helper files explicitly and run the bundled core script.
 
 ## Uninstall
 
@@ -176,7 +206,7 @@ Pro of a rules file: it works on hosts that have no plugin or skill system at al
 | Pi agent | `pi uninstall explain-and-decide` |
 | Kimi Code | `/plugins` in Kimi Code, then remove explain-and-decide |
 | Oh My Pi (omp) | `omp plugin uninstall explain-and-decide@explain-and-decide`, then `omp plugin marketplace remove explain-and-decide` |
-| OpenCode | Delete the copied `AGENTS.md` and `.opencode/command/` files |
+| OpenCode | Delete the copied `AGENTS.md`, `.opencode/command/` files and the three installed skill folders |
 | Gemini CLI | Use the extension management of your Gemini CLI version; the template lists no removal command |
 | Qoder | Remove the plugin through Qoder's plugin management, or delete the copied rule |
 | Antigravity CLI | Remove the plugin through Antigravity's plugin management; the template lists no removal command |
@@ -187,4 +217,4 @@ Pro of a rules file: it works on hosts that have no plugin or skill system at al
 | Goose | Delete `~/.agents/plugins/explain-and-decide` |
 | Cursor, Windsurf, Cline, Kiro, Qoder rule, Copilot Chat | Delete the copied rule file |
 
-These remove the skill and rules. They leave each project's `LEDGER.md` and any `.no-ledger` marker in place, since those belong to the project and never to the plugin; delete them by hand if you no longer want them.
+For every manual or rules-file installation, also remove the three copied skill folders when uninstalling. These steps remove the skills and rules. They leave each project's `LEDGER.md` and any `.no-ledger` marker in place, since those belong to the project and never to the plugin; delete them by hand if you no longer want them.

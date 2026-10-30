@@ -88,7 +88,7 @@ codex plugin add explain-and-decide@explain-and-decide
 
 **Every other host** (Copilot CLI, Gemini CLI, OpenCode, Cursor, Kimi, Hermes and more): step by step in **[INSTALL.md](INSTALL.md)**.
 
-**Without a plugin**, copy the folder `skills/explain-and-decide/` into `~/.claude/skills/` (Claude Code) or `~/.codex/skills/` (Codex). Pro: no marketplace needed. Con: updates are copied by hand and the two companion skills are left out.
+**Without a plugin**, copy all three sibling folders, `skills/explain-and-decide/`, `skills/explain-and-decide-help/` and `skills/explain-and-decide-ledger/`, into `~/.claude/skills/` (Claude Code) or `~/.codex/skills/` (Codex). Keep the core folder's `scripts/` directory. Pro: no marketplace needed, and both helpers are included. Con: updates are copied by hand. See the [complete bundle instructions](INSTALL.md#complete-skill-bundle) for manual and rules-file installations.
 
 ## Using the ledger script
 
@@ -99,6 +99,7 @@ The script is `scripts/ledger.ts` inside the core skill folder. On Claude Code t
 | `-decision-human [entry-file]` | Append one decision made by the user |
 | `-decision-agent [entry-file]` | Append one decision made by the agent on its own |
 | `-decision-external [entry-file]` | Append one decision taken from a meeting, email, link or other source |
+| `--at datetime` (decision switches only) | Set the event Date; default is script invocation time |
 | `-info` | Print the ledger path and size, plus a line when logging is disabled |
 | `-no-ledger` | Disable the ledger for this project (creates `.no-ledger`) |
 | `-yes-ledger` | Enable the ledger again (removes `.no-ledger`) |
@@ -161,6 +162,12 @@ node --experimental-strip-types "${CLAUDE_SKILL_DIR}/scripts/ledger.ts" -decisio
 ```
 
 Ready-made entry files: [examples/entry-files/](examples/entry-files/). Full entry grammar: [skills/explain-and-decide/SKILL.md](skills/explain-and-decide/SKILL.md).
+
+The optional `--at datetime` argument sets the entry's **Date** to when the decision happened. It works with all three decision switches, before or after the entry-file path. Omit it to use the time the script was invoked, captured before reading input. Supply an ISO 8601 calendar datetime (a numeric date and time) with an explicit time zone: `YYYY-MM-DDTHH:mm[:ss[.fraction]]` followed by `Z` (Coordinated Universal Time, UTC) or an offset such as `-07:00` or `+0530`. Square brackets here mean optional parts. The script preserves the supplied value and offset. Invalid calendar dates, clock times and missing time zones are rejected with exit 1 before writing. A missing or repeated `--at` argument, or its use with a non-decision switch, exits 2. The external-source `on` field still describes the meeting or email time; it does not set the entry's Date.
+
+```bash
+node --experimental-strip-types "<core skill folder>/scripts/ledger.ts" -decision-agent entry.txt --at "2026-10-28T09:00:00-07:00"
+```
 
 ## Skills and commands
 

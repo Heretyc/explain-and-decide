@@ -17,4 +17,6 @@ Try an entry file yourself from any folder (the script creates `LEDGER.md` there
 node --experimental-strip-types "<path to this repository>/skills/explain-and-decide/scripts/ledger.ts" -decision-human "<path to this repository>/examples/entry-files/human.txt"
 ```
 
+To record when the event happened, add `--at "2026-10-28T09:00:00-07:00"` to the command. This ISO 8601 timestamp gives a calendar date, time and explicit offset from Coordinated Universal Time (UTC). The entry Date preserves the value you supply. Without `--at`, Date is the time the script was invoked. A meeting or email's `on` source field does not override Date.
+
 The sample ledger is published here only as an illustration. A real `LEDGER.md` is private: the script keeps it out of version control through `.git/info/exclude`, and the skill forbids committing, publishing or mentioning it in public.

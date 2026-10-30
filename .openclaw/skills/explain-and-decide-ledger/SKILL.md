@@ -14,7 +14,7 @@ Run the script with `-info`. The script sits in the sibling core skill folder, `
 
 ## Review
 
-Read LEDGER.md. Each entry carries a Status (Draft, Proposed, Approved, Rejected or Deprecated), the deciders, a Context, the chosen option with its rationale and consequences, and every option's Pro and Con.
+Read LEDGER.md. Each entry carries a Date (the supplied event time, or the script invocation time when omitted), a Status (Draft, Proposed, Approved, Rejected or Deprecated), the deciders, a Context, the chosen option with its rationale and consequences, and every option's Pro and Con.
 
 - Group entries by Status. Surface Deprecated and Rejected entries first, since a reader who misses them acts on a decision that no longer holds.
 - For each decision show its title, the chosen option, and the Pro and Con that drove the choice.
@@ -28,8 +28,17 @@ When the user asks to record a decision:
 
 1. Pick the mode by source: `-decision-human` when the user decided, `-decision-agent` when the agent decided alone, `-decision-external` when a meeting, email, thread or comment settled it.
 2. Build an entry in the grammar: one `key: value` per line with `title`, `context`, two or more `opt` each followed by `pro` and `con`, `pick`, `why`, `plus`, `minus`, and the source keys for the mode (`by` for human and agent; `deciders` plus `url`, or `meeting` + `on`, or `subject` + `on` + `from`, or `other` for external). An optional `status` line sets Deprecated or Rejected.
-3. Deliver it by entry file (`-decision-human path/to/entry.txt`) or by standard input (a quoted bash heredoc, or a PowerShell single-quoted here-string piped to node). Use the file form whenever the text holds non-English letters on Windows.
-4. Report the script's output verbatim: the `appended:` line on exit 0; the listed problems on exit 1, then fix every one and retry; exit 3 means the ledger is disabled and nothing was recorded; exit 4 means LEDGER.md could not be written (locked by another program, read-only or full) and nothing was recorded, unless the line starts with `decision written but not confirmed on disk`: then the entry is there, so do not retry.
+3. When the event time is known, pass `--at "2026-10-28T09:00:00-07:00"` with the decision switch. Omit it to use script invocation time. Do not guess a missing time zone. This sets the entry Date independently of the meeting or email `on` field.
+4. Deliver it by entry file (`-decision-human path/to/entry.txt`) or by standard input (a quoted bash heredoc, or a PowerShell single-quoted here-string piped to node). Use the file form whenever the text holds non-English letters on Windows.
+5. Report the script's output verbatim: the `appended:` line on exit 0; the listed problems on exit 1, then fix every one and retry; exit 3 means the ledger is disabled and nothing was recorded; exit 4 means LEDGER.md could not be written (locked by another program, read-only or full) and nothing was recorded, unless the line starts with `decision written but not confirmed on disk`: then the entry is there, so do not retry.
+
+The optional `--at datetime` argument sets the entry's **Date** to when the decision happened. It works with all three decision switches, before or after the entry-file path. Omit it to use the time the script was invoked, captured before reading input. Supply an ISO 8601 calendar datetime (a numeric date and time) with an explicit time zone: `YYYY-MM-DDTHH:mm[:ss[.fraction]]` followed by `Z` (Coordinated Universal Time, UTC) or an offset such as `-07:00` or `+0530`. Square brackets here mean optional parts. The script preserves the supplied value and offset. Invalid calendar dates, clock times and missing time zones are rejected with exit 1 before writing. A missing or repeated `--at` argument, or its use with a non-decision switch, exits 2. The external-source `on` field still describes the meeting or email time; it does not set the entry's Date.
+
+```bash
+node --experimental-strip-types "<core skill folder>/scripts/ledger.ts" -decision-agent entry.txt --at "2026-10-28T09:00:00-07:00"
+```
+
+Entries remain in append order even when an event time is earlier than a preceding entry. Use their Date values when comparing event chronology.
 
 A reversal or a change of mind is a new entry whose Context names the entry it reverses. Never edit the earlier entry.
 

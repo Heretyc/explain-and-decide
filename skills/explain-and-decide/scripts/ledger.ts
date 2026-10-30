@@ -30,10 +30,11 @@ const EXAMPLE = [
 const EXAMPLE_SOURCE: Record<Mode, string[]> = { human: ["by: Alex"], agent: ["by: Claude Code"], external: ["deciders: Alex", "url: https://example.com/thread/1"] };
 
 const HELP = [
-  "usage: node ledger.ts <switch> [entry-file]   (-h | --help: this text)   exit: 0 appended, 1 rejected, 2 misuse, 3 disabled, 4 not written",
+  "usage: node --experimental-strip-types ledger.ts <switch> [entry-file] [--at datetime]   (-h | --help: this text)   exit: 0 appended, 1 rejected, 2 misuse, 3 disabled, 4 not written",
   "  -decision-human [file]     append a decision made by the user",
   "  -decision-agent [file]     append a decision made by the agent on its own",
   "  -decision-external [file]  append a decision taken from a meeting, email, link or other source",
+  "  --at datetime             event Date for decision switches only; ISO8601 YYYY-MM-DDTHH:mm[:ss[.fraction]]Z or +/-HH:mm (also +/-HHmm); default: invocation time; independent of source on",
   "  -info                      print the ledger path and size",
   "  -no-ledger | -yes-ledger   disable | enable the ledger for this project (.no-ledger marker)",
   "entry: \"key: value\" lines from the file or stdin; a line without a key continues the value above",
@@ -53,6 +54,21 @@ function isoNow(): string {
   const off = -d.getTimezoneOffset();
   const tz = off === 0 ? "Z" : (off > 0 ? "+" : "-") + p(Math.floor(Math.abs(off) / 60)) + ":" + p(Math.abs(off) % 60);
   return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}${tz}`;
+}
+
+// Capture before reading input: a caller may supply an entry over a slow pipe.
+const INVOKED_AT = isoNow();
+
+function validEventTime(value: string): boolean {
+  const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2})(?:\.\d+)?)?(Z|([+-])(\d{2}):?(\d{2}))$/.exec(value);
+  if (!m) return false;
+  const [, year, month, day, hour, minute, second, zone, , zoneHour, zoneMinute] = m;
+  const y = Number(year), mo = Number(month), d = Number(day);
+  const leap = y % 4 === 0 && (y % 100 !== 0 || y % 400 === 0);
+  const days = [31, leap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  return mo >= 1 && mo <= 12 && d >= 1 && d <= days[mo - 1]
+    && Number(hour) <= 23 && Number(minute) <= 59 && Number(second ?? 0) <= 59
+    && (zone === "Z" || (Number(zoneHour) <= 23 && Number(zoneMinute) <= 59));
 }
 
 function git(args: string[], cwd: string): string {
@@ -131,7 +147,7 @@ function parse(text: string): { items: Item[]; errors: string[] } {
 
 const ON_RE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:?\d{2})$/;
 
-function build(mode: Mode, items: Item[], errors: string[]): { title: string; lines: string[] } | null {
+function build(mode: Mode, items: Item[], errors: string[], eventTime: string): { title: string; lines: string[] } | null {
   const one: Record<string, Item> = {};
   const opts: Opt[] = [], plus: string[] = [], minus: string[] = [];
   for (const it of items) {
@@ -189,7 +205,7 @@ function build(mode: Mode, items: Item[], errors: string[]): { title: string; li
   }
   if (errors.length) return null;
   const why = val("why");
-  const lines = [`# ${val("title")}`, `* **Status:** ${status}`, `* **Date:** ${isoNow()}`, `* **Deciders:** ${deciders}`,
+  const lines = [`# ${val("title")}`, `* **Status:** ${status}`, `* **Date:** ${eventTime}`, `* **Deciders:** ${deciders}`,
     `* **Source:** ${source}`, "## Context", val("context"), "## Considered Options"];
   opts.forEach((o, i) => lines.push(`* **Option ${i + 1}:** ${o.name}`));
   lines.push("## Decision & Outcome", `We chose **Option ${pick}: ${opts[pick - 1].name}** because ${why}${/[.!?]$/.test(why) ? "" : "."}`, "### Consequences");
@@ -286,10 +302,20 @@ function excludeLedger(root: string): void {
 }
 
 async function main(): Promise<void> {
-  const [sw, file, extra] = process.argv.slice(2);
+  const [sw, ...args] = process.argv.slice(2);
   if (sw === "-h" || sw === "--help") help(0);
   const mode = MODES[sw];
-  if (!sw || extra !== undefined || (!mode && (file !== undefined || !["-info", "-no-ledger", "-yes-ledger"].includes(sw)))) help(2);
+  if (!sw || (!mode && (args.length || !["-info", "-no-ledger", "-yes-ledger"].includes(sw)))) help(2);
+  let file: string | undefined, at: string | undefined;
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === "--at") {
+      if (at !== undefined || args[i + 1] === undefined || args[i + 1].startsWith("--")) {
+        err("--at: supply one datetime value, once"); help(2);
+      }
+      at = args[++i];
+    } else if (args[i].startsWith("--") || file !== undefined) help(2);
+    else file = args[i];
+  }
   const root = findRoot(), ledger = join(root, "LEDGER.md"), marker = join(root, ".no-ledger");
   const disabled = existsSync(marker);
   if (sw === "-info") {
@@ -308,6 +334,10 @@ async function main(): Promise<void> {
     return;
   }
   if (disabled) { err("ledger disabled for this project (.no-ledger present); run -yes-ledger to enable it again"); process.exit(3); }
+  if (at !== undefined && !validEventTime(at)) {
+    err("--at: use a valid ISO8601 calendar datetime with timezone, e.g. 2026-10-28T09:00:00-07:00; nothing written");
+    process.exit(1);
+  }
   let buf = Buffer.alloc(0);
   if (file !== undefined) {
     try { buf = readFileSync(resolve(file)); } catch { err(`cannot read ${file}`); process.exit(2); }
@@ -316,7 +346,7 @@ async function main(): Promise<void> {
   const text = decode(buf);
   if (!text.trim()) help(2);
   const { items, errors } = parse(text);
-  const built = build(mode, items, errors);
+  const built = build(mode, items, errors, at ?? INVOKED_AT);
   if (!built) { errors.concat(["example:"], EXAMPLE, EXAMPLE_SOURCE[mode]).forEach(err); process.exit(1); }
   const head = `# DECISIONS LEDGER FOR ${basename(root)}\nAll notable decisions to this project will be documented in this file.\n`
     + "Intended for local user review only: Never publish to any repository or mention in any public way. For the user's eyes only.\n";
